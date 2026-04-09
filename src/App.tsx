@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Copy, Crown, LogOut, Play, RotateCcw, Wifi, WifiOff } from 'lucide-react'
+import { Copy, Crown, LogOut, Moon, Play, RotateCcw, Sun, Wifi, WifiOff } from 'lucide-react'
 import { io, type Socket } from 'socket.io-client'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
@@ -71,6 +71,7 @@ type StoredSession = Credentials & {
 const SERVER_URL = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:3333'
 const SESSION_KEY = 'sueka-tab-session'
 const NAME_KEY = 'sueka-player-name'
+const THEME_KEY = 'sueka-theme'
 const suitLabel: Record<Suit, string> = {
   clubs: 'Paus',
   diamonds: 'Ouros',
@@ -160,15 +161,15 @@ function SeatPanel({
   return (
     <div
       className={cn(
-        'min-h-16 rounded-md border bg-white p-2 text-zinc-950 shadow-sm sm:min-h-20',
-        active && 'border-emerald-700 bg-emerald-200 ring-2 ring-emerald-700/30',
-        viewerSeat === index && 'border-zinc-950',
+        'seat-panel min-h-16 rounded-md border bg-white p-2 text-zinc-950 shadow-sm sm:min-h-20',
+        active && 'seat-panel-active border-emerald-700 bg-emerald-200 ring-2 ring-emerald-700/30',
+        viewerSeat === index && 'seat-panel-viewer border-zinc-950',
       )}
     >
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1 sm:mb-2">
-        <span className="text-xs font-bold uppercase text-zinc-500">Lugar {index + 1}</span>
+        <span className="seat-panel-caption text-xs font-bold uppercase text-zinc-500">Lugar {index + 1}</span>
         <div className="flex flex-wrap items-center justify-end gap-1">
-          <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-700 sm:text-xs">
+          <span className="seat-panel-badge rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-700 sm:text-xs">
             Dupla {index % 2 + 1}
           </span>
           {active && (
@@ -182,11 +183,11 @@ function SeatPanel({
 
       {seat ? (
         <div className="space-y-0.5 sm:space-y-1">
-          <div className="flex items-center gap-1.5 text-sm font-bold text-zinc-950 sm:text-base">
+          <div className="seat-panel-name flex items-center gap-1.5 text-sm font-bold text-zinc-950 sm:text-base">
             {seat.isOwner && <Crown className="h-3.5 w-3.5 text-amber-600 sm:h-4 sm:w-4" />}
             <span className="truncate leading-tight">{seat.name}</span>
           </div>
-          <div className="flex items-center justify-between text-xs text-zinc-600 sm:text-sm">
+          <div className="seat-panel-meta flex items-center justify-between text-xs text-zinc-600 sm:text-sm">
             <span>{seat.handCount} cartas</span>
             {seat.connected ? (
               <Wifi className="h-3.5 w-3.5 text-emerald-700 sm:h-4 sm:w-4" />
@@ -222,6 +223,7 @@ function App() {
   const attemptedReconnectRef = useRef(false)
   const [path, setPath] = useState(() => window.location.pathname)
   const [playerName, setPlayerName] = useState(() => readStoredSession()?.playerName ?? localStorage.getItem(NAME_KEY) ?? '')
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'))
   const [roomCodeInput, setRoomCodeInput] = useState(() => roomCodeFromPath())
   const [credentials, setCredentials] = useState<Credentials | null>(null)
   const [room, setRoom] = useState<RoomState | null>(null)
@@ -233,6 +235,11 @@ function App() {
     playerNameRef.current = playerName
     localStorage.setItem(NAME_KEY, playerName)
   }, [playerName])
+
+  useEffect(() => {
+    localStorage.setItem(THEME_KEY, theme)
+    document.body.classList.toggle('theme-dark', theme === 'dark')
+  }, [theme])
 
   useEffect(() => {
     const updatePath = () => {
@@ -380,46 +387,59 @@ function App() {
   }
 
   return (
-    <main className="min-h-svh">
+    <main className={cn('app-shell min-h-svh', theme === 'dark' && 'theme-dark')}>
       <section className="mx-auto flex min-h-svh w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-4">
+        <header className="app-header flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-4">
           <div>
-            <p className="text-sm font-bold uppercase text-emerald-800">Sueka online</p>
-            <h1 className="text-3xl font-black text-zinc-950 sm:text-4xl">Mesa para quatro amigos</h1>
+            <p className="app-kicker text-sm font-bold uppercase text-emerald-800">Sueka online</p>
+            <h1 className="app-title text-3xl font-black text-zinc-950 sm:text-4xl">Mesa para quatro amigos</h1>
           </div>
-          <div className="flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm text-zinc-700">
-            {connected ? <Wifi className="h-4 w-4 text-emerald-700" /> : <WifiOff className="h-4 w-4 text-red-700" />}
-            {connected ? 'Conectado' : 'Sem conexão'}
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <label className="theme-toggle flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm font-semibold">
+              <span className="flex items-center gap-2">
+                {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                Modo escuro
+              </span>
+              <input
+                checked={theme === 'dark'}
+                onChange={(event) => setTheme(event.target.checked ? 'dark' : 'light')}
+                type="checkbox"
+              />
+            </label>
+            <div className="connection-badge flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm text-zinc-700">
+              {connected ? <Wifi className="h-4 w-4 text-emerald-700" /> : <WifiOff className="h-4 w-4 text-red-700" />}
+              {connected ? 'Conectado' : 'Sem conexão'}
+            </div>
           </div>
         </header>
 
         {!room ? (
           <div className="grid flex-1 items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-5">
-              <p className="max-w-2xl text-lg text-zinc-700">
+              <p className="app-lead max-w-2xl text-lg text-zinc-700">
                 Crie uma sala, compartilhe o código e jogue Sueka em duplas. O servidor guarda a partida em memória e cada
                 pessoa vê só a própria mão.
               </p>
               <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
-                <div className="rounded-md border bg-white p-4">
-                  <p className="text-2xl font-black text-zinc-950">40</p>
-                  <p className="text-sm text-zinc-600">cartas no baralho</p>
+                <div className="theme-surface rounded-md border bg-white p-4">
+                  <p className="theme-heading text-2xl font-black text-zinc-950">40</p>
+                  <p className="theme-text-soft text-sm text-zinc-600">cartas no baralho</p>
                 </div>
-                <div className="rounded-md border bg-white p-4">
-                  <p className="text-2xl font-black text-zinc-950">4</p>
-                  <p className="text-sm text-zinc-600">jogadores sentados</p>
+                <div className="theme-surface rounded-md border bg-white p-4">
+                  <p className="theme-heading text-2xl font-black text-zinc-950">4</p>
+                  <p className="theme-text-soft text-sm text-zinc-600">jogadores sentados</p>
                 </div>
-                <div className="rounded-md border bg-white p-4">
-                  <p className="text-2xl font-black text-zinc-950">2</p>
-                  <p className="text-sm text-zinc-600">duplas opostas</p>
+                <div className="theme-surface rounded-md border bg-white p-4">
+                  <p className="theme-heading text-2xl font-black text-zinc-950">2</p>
+                  <p className="theme-text-soft text-sm text-zinc-600">duplas opostas</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-md border bg-white p-5 shadow-sm">
+            <div className="theme-surface rounded-md border bg-white p-5 shadow-sm">
               <form className="space-y-4" onSubmit={roomCodeInput ? joinRoom : createRoom}>
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-zinc-800" htmlFor="player-name">
+                  <label className="theme-label mb-2 block text-sm font-semibold text-zinc-800" htmlFor="player-name">
                     Seu nome
                   </label>
                   <Input
@@ -432,7 +452,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-zinc-800" htmlFor="room-code">
+                  <label className="theme-label mb-2 block text-sm font-semibold text-zinc-800" htmlFor="room-code">
                     Código da sala
                   </label>
                   <Input
@@ -460,18 +480,18 @@ function App() {
         ) : (
           <div className="grid flex-1 gap-5 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
             <aside className="space-y-4">
-              <div className="rounded-md border bg-white p-4 shadow-sm">
+              <div className="theme-surface rounded-md border bg-white p-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold uppercase text-zinc-500">Sala</p>
-                    <p className="text-2xl font-black text-zinc-950">{room.roomCode}</p>
+                    <p className="theme-caption text-xs font-bold uppercase text-zinc-500">Sala</p>
+                    <p className="theme-heading text-2xl font-black text-zinc-950">{room.roomCode}</p>
                   </div>
                   <Button onClick={copyRoomCode} size="sm" variant="secondary">
                     <Copy className="h-4 w-4" />
                     Copiar
                   </Button>
                 </div>
-                <p className="text-sm text-zinc-600">
+                <p className="theme-text-soft text-sm text-zinc-600">
                   {room.status === 'lobby' && 'Escolham os lugares. Assentos opostos formam uma dupla.'}
                   {room.status === 'playing' && `Vaza ${room.trickNumber} de 10. Vez de ${activeSeatName}.`}
                   {room.status === 'finished' &&
@@ -479,38 +499,33 @@ function App() {
                 </p>
               </div>
 
-              <div className="rounded-md border bg-white p-4 shadow-sm">
-                <p className="mb-3 text-sm font-bold uppercase text-zinc-500">Pontos</p>
+              <div className="theme-surface rounded-md border bg-white p-4 shadow-sm">
+                <p className="theme-caption mb-3 text-sm font-bold uppercase text-zinc-500">Pontos</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-md bg-emerald-50 p-3">
+                  <div className="score-card score-card-team1 rounded-md bg-emerald-50 p-3">
                     <p className="text-xs font-semibold text-emerald-900">Dupla 1</p>
                     <p className="text-3xl font-black text-emerald-950">{room.scores[0]}</p>
                   </div>
-                  <div className="rounded-md bg-red-50 p-3">
+                  <div className="score-card score-card-team2 rounded-md bg-red-50 p-3">
                     <p className="text-xs font-semibold text-red-900">Dupla 2</p>
                     <p className="text-3xl font-black text-red-950">{room.scores[1]}</p>
                   </div>
                 </div>
-                {room.trump && (
-                  <p className="mt-3 rounded-md bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-800">
-                    Trunfo: {suitSymbol[room.trump]} {suitLabel[room.trump]}
-                  </p>
-                )}
               </div>
 
-              <div className="rounded-md border bg-white p-4 shadow-sm">
-                <p className="mb-3 text-sm font-bold uppercase text-zinc-500">Placar da Sueka</p>
+              <div className="theme-surface rounded-md border bg-white p-4 shadow-sm">
+                <p className="theme-caption mb-3 text-sm font-bold uppercase text-zinc-500">Placar da Sueka</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-md bg-emerald-50 p-3">
+                  <div className="score-card score-card-team1 rounded-md bg-emerald-50 p-3">
                     <p className="text-xs font-semibold text-emerald-900">Dupla 1</p>
                     <p className="text-3xl font-black text-emerald-950">{room.matchScore[0]}</p>
                   </div>
-                  <div className="rounded-md bg-red-50 p-3">
+                  <div className="score-card score-card-team2 rounded-md bg-red-50 p-3">
                     <p className="text-xs font-semibold text-red-900">Dupla 2</p>
                     <p className="text-3xl font-black text-red-950">{room.matchScore[1]}</p>
                   </div>
                 </div>
-                <p className="mt-3 rounded-md bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-800">
+                <p className="theme-muted-panel mt-3 rounded-md bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-800">
                   {room.matchWinnerTeam === null
                     ? `Meta: 4 pontos. Proxima rodada vale ${room.nextRoundStake}.`
                     : `Dupla ${room.matchWinnerTeam + 1} fechou a Sueka. Reiniciar começa um novo placar.`}
@@ -579,6 +594,11 @@ function App() {
               </div>
 
               <div>
+                {room.trump && (
+                  <p className="mb-3 rounded-md border border-emerald-700 bg-emerald-800 px-3 py-2 text-sm font-semibold text-emerald-50">
+                    Trunfo: {suitSymbol[room.trump]} {suitLabel[room.trump]}
+                  </p>
+                )}
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-bold uppercase text-emerald-100">Sua mão</p>
                   <p className="text-sm text-emerald-50">
@@ -614,12 +634,12 @@ function App() {
 
             <aside className="space-y-4">
               {error && <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
-              <div className="rounded-md border bg-white p-4 shadow-sm">
-                <p className="mb-3 text-sm font-bold uppercase text-zinc-500">Eventos</p>
+              <div className="theme-surface rounded-md border bg-white p-4 shadow-sm">
+                <p className="theme-caption mb-3 text-sm font-bold uppercase text-zinc-500">Eventos</p>
                 <div className="space-y-3">
-                  {events.length === 0 && <p className="text-sm text-zinc-600">Os eventos da sala aparecem aqui.</p>}
+                  {events.length === 0 && <p className="theme-text-soft text-sm text-zinc-600">Os eventos da sala aparecem aqui.</p>}
                   {events.map((event) => (
-                    <p className="rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-700" key={event.id}>
+                    <p className="theme-muted-panel rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-700" key={event.id}>
                       {event.message}
                     </p>
                   ))}
