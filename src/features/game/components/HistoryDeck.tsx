@@ -18,13 +18,13 @@ export function HistoryDeck({ room, viewerTeamLabel, historyOpen, onToggle, onCl
           <span className="history-deck-layer history-deck-layer-back" />
           <span className="history-deck-layer history-deck-layer-mid" />
           <span className="history-deck-layer history-deck-layer-front">
-            <span className="history-deck-label">{room.viewerSeat === -1 ? 'Vazas' : viewerTeamLabel}</span>
+            <span className="history-deck-label">Vazas</span>
           </span>
         </button>
       </div>
 
       {historyOpen && (
-        <div className="history-popover absolute max-w-100 top-5 right-5 z-30 flex max-h-[calc(100dvh-16rem)] flex-col overflow-hidden rounded-2xl border p-4 shadow-2xl">
+        <div className="history-popover absolute max-w-100 top-5 right-5 z-30 flex max-h-[calc(100dvh-17rem)] flex-col overflow-hidden rounded-2xl border p-4 shadow-2xl">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-200">Vazas ganhas</p>

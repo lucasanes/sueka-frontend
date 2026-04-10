@@ -63,7 +63,6 @@ export function RoomPage({
   onLeaveRoom,
 }: RoomPageProps) {
   const [historyOpen, setHistoryOpen] = useState(false)
-  const startLabel = room.status === 'finished' ? 'Iniciar próxima rodada' : 'Iniciar'
 
   return (
     <div className="grid flex-1 gap-5 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
@@ -122,7 +121,7 @@ export function RoomPage({
         <div className="flex gap-2">
           <Button className="flex-1" disabled={!canStart} onClick={onStartGame}>
             <Play className="h-4 w-4" />
-            {startLabel}
+            Iniciar
           </Button>
           <Button className="flex-1" disabled={!isOwner} onClick={onRestartGame} variant="secondary">
             <RotateCcw className="h-4 w-4" />
