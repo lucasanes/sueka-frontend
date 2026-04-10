@@ -20,7 +20,7 @@ export function SeatPanel({ seat, index, active, viewerSeat, onTakeSeat, onAddBo
     <div
       className={cn(
         'seat-panel min-h-16 rounded-md border bg-white p-2 text-zinc-950 shadow-sm sm:min-h-20',
-        active && 'seat-panel-active border-emerald-700 ring-2 ring-emerald-700/30',
+        active && 'seat-panel-active border-emerald-700 bg-emerald-200 ring-2 ring-emerald-700/30',
         viewerSeat === index && 'seat-panel-viewer border-zinc-950',
       )}
     >

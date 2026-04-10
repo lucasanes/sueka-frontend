@@ -1,11 +1,99 @@
 @import "tailwindcss";
 
+:root {
+  --app-bg: #0f172a;
+  --app-text: #e5e7eb;
+  --header-border: #334155;
+  --kicker-color: #6ee7b7;
+  --heading-color: #f8fafc;
+  --text-soft: #cbd5e1;
+  --caption-color: #94a3b8;
+  --surface-bg: #111827;
+  --surface-border: #334155;
+  --surface-text: #e5e7eb;
+  --muted-panel-bg: #1e293b;
+  --muted-panel-text: #e2e8f0;
+  --connection-bg: #111827;
+  --connection-border: #334155;
+  --connection-text: #e5e7eb;
+  --input-bg: #0f172a;
+  --input-border: #475569;
+  --input-text: #f8fafc;
+  --input-placeholder: #94a3b8;
+  --input-focus-border: #10b981;
+  --input-focus-ring: rgba(16, 185, 129, 0.2);
+  --button-default-bg: linear-gradient(180deg, #059669, #047857);
+  --button-default-hover-bg: linear-gradient(180deg, #10b981, #059669);
+  --button-default-border: #047857;
+  --button-default-text: #f8fafc;
+  --button-default-outline: #10b981;
+  --button-secondary-bg: rgba(15, 23, 42, 0.94);
+  --button-secondary-hover-bg: rgba(30, 41, 59, 0.96);
+  --button-secondary-border: #334155;
+  --button-secondary-hover-border: #475569;
+  --button-secondary-text: #e5e7eb;
+  --button-secondary-hover-text: #f8fafc;
+  --button-secondary-outline: #64748b;
+  --button-ghost-bg: transparent;
+  --button-ghost-hover-bg: rgba(30, 41, 59, 0.78);
+  --button-ghost-border: transparent;
+  --button-ghost-hover-border: rgba(71, 85, 105, 0.6);
+  --button-ghost-text: #cbd5e1;
+  --button-ghost-hover-text: #f8fafc;
+  --button-ghost-outline: #64748b;
+  --button-danger-bg: linear-gradient(180deg, #b91c1c, #991b1b);
+  --button-danger-hover-bg: linear-gradient(180deg, #dc2626, #b91c1c);
+  --button-danger-border: #991b1b;
+  --button-danger-text: #fff7f7;
+  --button-danger-outline: #ef4444;
+  --seat-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.96));
+  --seat-border: #314158;
+  --seat-text: #e5e7eb;
+  --seat-caption: #94a3b8;
+  --seat-badge-bg: rgba(148, 163, 184, 0.12);
+  --seat-badge-text: #dbe4ee;
+  --seat-meta: #cbd5e1;
+  --seat-bot-bg: rgba(52, 211, 153, 0.16);
+  --seat-bot-text: #a7f3d0;
+  --seat-viewer-border: #f8fafc;
+  --seat-viewer-shadow:
+    inset 0 1px 0 rgba(248, 250, 252, 0.1),
+    0 0 0 1px rgba(248, 250, 252, 0.22);
+  --seat-active-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 1));
+  --seat-active-border: #10b981;
+  --seat-active-text: #f8fafc;
+  --seat-active-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 30px rgba(15, 23, 42, 0.26);
+  --seat-active-caption: #a7f3d0;
+  --seat-active-badge-bg: rgba(236, 253, 245, 0.14);
+  --seat-active-badge-text: #f0fdf4;
+  --score-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --score-team1-border: rgba(52, 211, 153, 0.3);
+  --score-team1-bg:
+    radial-gradient(circle at top left, rgba(52, 211, 153, 0.22), transparent 55%),
+    linear-gradient(180deg, rgba(5, 46, 22, 0.98), rgba(6, 78, 59, 0.92));
+  --score-team1-label: #a7f3d0;
+  --score-team1-value: #ecfdf5;
+  --score-team2-border: rgba(248, 113, 113, 0.28);
+  --score-team2-bg:
+    radial-gradient(circle at top left, rgba(248, 113, 113, 0.2), transparent 55%),
+    linear-gradient(180deg, rgba(69, 10, 10, 0.98), rgba(127, 29, 29, 0.92));
+  --score-team2-label: #fecaca;
+  --score-team2-value: #fef2f2;
+  --history-layer-back: rgba(15, 23, 42, 0.94);
+  --history-layer-mid: rgba(6, 78, 59, 0.94);
+  --history-layer-front:
+    linear-gradient(135deg, rgba(167, 243, 208, 0.18), transparent 42%),
+    linear-gradient(180deg, #e2e8f0, #cbd5e1);
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100svh;
-  background: #f7f8f4;
-  color: #18181b;
+  background: var(--app-bg);
+  color: var(--app-text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -18,146 +106,176 @@ body {
   min-height: 100svh;
 }
 
-body.theme-dark {
-  background: #0f172a;
-  color: #e5e7eb;
-}
-
 .app-shell {
   transition:
     background-color 180ms ease,
     color 180ms ease;
 }
 
-.theme-dark .app-header {
-  border-color: #334155;
+.app-header {
+  border-color: var(--header-border);
 }
 
-.theme-dark .app-kicker {
-  color: #6ee7b7;
+.app-kicker {
+  color: var(--kicker-color);
 }
 
-.theme-dark .app-title,
-.theme-dark .theme-heading,
-.theme-dark .theme-label {
-  color: #f8fafc;
+.theme-heading,
+.theme-label {
+  color: var(--heading-color);
 }
 
-.theme-dark .app-lead,
-.theme-dark .theme-text-soft {
-  color: #cbd5e1;
+.app-lead,
+.theme-text-soft {
+  color: var(--text-soft);
 }
 
-.theme-dark .theme-caption {
-  color: #94a3b8;
+.theme-caption {
+  color: var(--caption-color);
 }
 
-.theme-dark .theme-surface {
-  border-color: #334155;
-  background: #111827;
-  color: #e5e7eb;
+.theme-surface {
+  border-color: var(--surface-border);
+  background: var(--surface-bg);
+  color: var(--surface-text);
 }
 
-.theme-dark .theme-muted-panel {
-  background: #1e293b;
-  color: #e2e8f0;
+.theme-muted-panel {
+  background: var(--muted-panel-bg);
+  color: var(--muted-panel-text);
 }
 
-.theme-dark .seat-panel {
-  border-color: #314158;
-  background:
-    linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.96));
-  color: #e5e7eb;
+.connection-badge,
+.theme-toggle {
+  border-color: var(--connection-border);
+  background: var(--connection-bg);
+  color: var(--connection-text);
+}
+
+[data-ui-button][data-ui-variant='default'] {
+  border-color: var(--button-default-border);
+  background: var(--button-default-bg);
+  color: var(--button-default-text);
+}
+
+[data-ui-button][data-ui-variant='default']:hover {
+  background: var(--button-default-hover-bg);
+}
+
+[data-ui-button][data-ui-variant='secondary'] {
+  border-color: var(--button-secondary-border);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+[data-ui-button][data-ui-variant='secondary']:hover {
+  border-color: var(--button-secondary-hover-border);
+  background: var(--button-secondary-hover-bg);
+  color: var(--button-secondary-hover-text);
+}
+
+[data-ui-button][data-ui-variant='danger'] {
+  border-color: var(--button-danger-border);
+  background: var(--button-danger-bg);
+  color: var(--button-danger-text);
+}
+
+[data-ui-button][data-ui-variant='danger']:hover {
+  background: var(--button-danger-hover-bg);
+}
+
+[data-ui-button][data-ui-variant='ghost'] {
+  border-color: var(--button-ghost-border);
+  background: var(--button-ghost-bg);
+  color: var(--button-ghost-text);
+}
+
+[data-ui-button][data-ui-variant='ghost']:hover {
+  border-color: var(--button-ghost-hover-border);
+  background: var(--button-ghost-hover-bg);
+  color: var(--button-ghost-hover-text);
+}
+
+.seat-panel {
+  border-color: var(--seat-border);
+  background: var(--seat-bg);
+  color: var(--seat-text);
   box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08);
 }
 
-.theme-dark .seat-panel-caption {
-  color: #94a3b8;
+.seat-panel-caption {
+  color: var(--seat-caption);
 }
 
-.theme-dark .seat-panel-badge {
-  background: rgba(148, 163, 184, 0.12);
-  color: #dbe4ee;
+.seat-panel-badge {
+  background: var(--seat-badge-bg);
+  color: var(--seat-badge-text);
+}
+
+.seat-panel-name {
+  color: var(--heading-color);
+}
+
+.seat-panel-meta {
+  color: var(--seat-meta);
 }
 
 .seat-panel-bot {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--seat-bot-bg);
+  color: var(--seat-bot-text);
 }
 
-.theme-dark .seat-panel-name {
-  color: #f8fafc;
+.seat-panel-viewer {
+  border-color: var(--seat-viewer-border);
+  box-shadow: var(--seat-viewer-shadow);
 }
 
-.theme-dark .seat-panel-meta {
-  color: #cbd5e1;
+.seat-panel-active {
+  border-color: var(--seat-active-border);
+  background: var(--seat-active-bg);
+  color: var(--seat-active-text);
+  box-shadow: var(--seat-active-shadow);
 }
 
-.theme-dark .seat-panel-viewer {
-  border-color: #f8fafc;
-  box-shadow:
-    inset 0 1px 0 rgba(248, 250, 252, 0.1),
-    0 0 0 1px rgba(248, 250, 252, 0.22);
+.seat-panel-active .seat-panel-caption,
+.seat-panel-active .seat-panel-meta {
+  color: var(--seat-active-caption);
 }
 
-.theme-dark .seat-panel-active {
-  border-color: #34d399;
-  background:
-    linear-gradient(180deg, rgba(6, 78, 59, 0.96), rgba(4, 120, 87, 0.92));
-  color: #ecfdf5;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 16px 30px rgba(4, 120, 87, 0.18);
+.seat-panel-active .seat-panel-badge {
+  background: var(--seat-active-badge-bg);
+  color: var(--seat-active-badge-text);
 }
 
-.theme-dark .seat-panel-active .seat-panel-caption,
-.theme-dark .seat-panel-active .seat-panel-meta {
-  color: #d1fae5;
-}
-
-.theme-dark .seat-panel-active .seat-panel-badge {
-  background: rgba(236, 253, 245, 0.14);
-  color: #f0fdf4;
-}
-
-.theme-dark .seat-panel-bot {
-  background: rgba(52, 211, 153, 0.16);
-  color: #a7f3d0;
-}
-
-.theme-dark .score-card {
+.score-card {
   border: 1px solid transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: var(--score-card-shadow);
 }
 
-.theme-dark .score-card-team1 {
-  border-color: rgba(52, 211, 153, 0.3);
-  background:
-    radial-gradient(circle at top left, rgba(52, 211, 153, 0.22), transparent 55%),
-    linear-gradient(180deg, rgba(5, 46, 22, 0.98), rgba(6, 78, 59, 0.92));
+.score-card-team1 {
+  border-color: var(--score-team1-border);
+  background: var(--score-team1-bg);
 }
 
-.theme-dark .score-card-team1 p:first-child {
-  color: #a7f3d0;
+.score-card-team1 p:first-child {
+  color: var(--score-team1-label);
 }
 
-.theme-dark .score-card-team1 p:last-child {
-  color: #ecfdf5;
+.score-card-team1 p:last-child {
+  color: var(--score-team1-value);
 }
 
-.theme-dark .score-card-team2 {
-  border-color: rgba(248, 113, 113, 0.28);
-  background:
-    radial-gradient(circle at top left, rgba(248, 113, 113, 0.2), transparent 55%),
-    linear-gradient(180deg, rgba(69, 10, 10, 0.98), rgba(127, 29, 29, 0.92));
+.score-card-team2 {
+  border-color: var(--score-team2-border);
+  background: var(--score-team2-bg);
 }
 
-.theme-dark .score-card-team2 p:first-child {
-  color: #fecaca;
+.score-card-team2 p:first-child {
+  color: var(--score-team2-label);
 }
 
-.theme-dark .score-card-team2 p:last-child {
-  color: #fef2f2;
+.score-card-team2 p:last-child {
+  color: var(--score-team2-value);
 }
 
 .history-deck {
@@ -182,13 +300,13 @@ body.theme-dark {
 
 .history-deck-layer-back {
   transform: rotate(-8deg) translate(-6px, 4px);
-  background: rgba(6, 46, 32, 0.92);
+  background: var(--history-layer-back);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .history-deck-layer-mid {
   transform: rotate(5deg) translate(4px, 1px);
-  background: rgba(7, 89, 64, 0.92);
+  background: var(--history-layer-mid);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -197,9 +315,7 @@ body.theme-dark {
   align-items: flex-end;
   justify-content: center;
   padding: 10px 8px;
-  background:
-    linear-gradient(135deg, rgba(240, 253, 244, 0.24), transparent 42%),
-    linear-gradient(180deg, #f8fafc, #dbe4ee);
+  background: var(--history-layer-front);
   border: 1px solid rgba(255, 255, 255, 0.52);
   box-shadow: 0 14px 30px rgba(2, 8, 23, 0.28);
 }
@@ -303,97 +419,4 @@ body.theme-dark {
   min-height: 96px;
   width: 68px;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
-}
-
-.theme-dark .connection-badge,
-.theme-dark .theme-toggle {
-  border-color: #334155;
-  background: #111827;
-  color: #e5e7eb;
-}
-
-.theme-dark .history-deck-layer-back {
-  background: rgba(15, 23, 42, 0.94);
-}
-
-.theme-dark .history-deck-layer-mid {
-  background: rgba(6, 78, 59, 0.94);
-}
-
-.theme-dark .history-deck-layer-front {
-  background:
-    linear-gradient(135deg, rgba(167, 243, 208, 0.18), transparent 42%),
-    linear-gradient(180deg, #e2e8f0, #cbd5e1);
-}
-
-.theme-toggle input {
-  accent-color: #047857;
-}
-
-.theme-dark [data-ui-input] {
-  border-color: #475569;
-  background: #0f172a;
-  color: #f8fafc;
-}
-
-.theme-dark [data-ui-input]::placeholder {
-  color: #94a3b8;
-}
-
-.theme-dark [data-ui-button] {
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
-}
-
-.theme-dark [data-ui-button][data-ui-variant='default'] {
-  border-color: #047857;
-  background: linear-gradient(180deg, #059669, #047857);
-  color: #f8fafc;
-}
-
-.theme-dark [data-ui-button][data-ui-variant='default']:hover {
-  background: linear-gradient(180deg, #10b981, #059669);
-  box-shadow: 0 10px 24px rgba(4, 120, 87, 0.28);
-}
-
-.theme-dark [data-ui-button][data-ui-variant='secondary'] {
-  border-color: #334155;
-  background: rgba(15, 23, 42, 0.94);
-  color: #e5e7eb;
-}
-
-.theme-dark [data-ui-button][data-ui-variant='secondary']:hover {
-  border-color: #475569;
-  background: rgba(30, 41, 59, 0.96);
-  color: #f8fafc;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
-}
-
-.theme-dark [data-ui-button][data-ui-variant='ghost'] {
-  border-color: transparent;
-  background: transparent;
-  color: #cbd5e1;
-  box-shadow: none;
-}
-
-.theme-dark [data-ui-button][data-ui-variant='ghost']:hover {
-  border-color: rgba(71, 85, 105, 0.6);
-  background: rgba(30, 41, 59, 0.78);
-  color: #f8fafc;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
-}
-
-.theme-dark [data-ui-button][data-ui-variant='danger'] {
-  border-color: #991b1b;
-  background: linear-gradient(180deg, #b91c1c, #991b1b);
-  color: #fff7f7;
-}
-
-.theme-dark [data-ui-button][data-ui-variant='danger']:hover {
-  background: linear-gradient(180deg, #dc2626, #b91c1c);
-  box-shadow: 0 10px 24px rgba(153, 27, 27, 0.25);
 }
