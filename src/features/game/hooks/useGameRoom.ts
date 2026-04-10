@@ -7,6 +7,7 @@ import type { Credentials, GameEvent, RoomState } from '../types'
 export function useGameRoom() {
   const socketRef = useRef<Socket | null>(null)
   const playerNameRef = useRef('')
+  const roomRef = useRef<RoomState | null>(null)
   const attemptedReconnectRef = useRef(false)
   const [path, setPath] = useState(() => window.location.pathname)
   const [playerName, setPlayerName] = useState(() => readStoredSession()?.playerName ?? localStorage.getItem(NAME_KEY) ?? '')
@@ -45,6 +46,10 @@ export function useGameRoom() {
     playerNameRef.current = playerName
     localStorage.setItem(NAME_KEY, playerName)
   }, [playerName])
+
+  useEffect(() => {
+    roomRef.current = room
+  }, [room])
 
   useEffect(() => {
     const updatePath = () => {
@@ -91,13 +96,21 @@ export function useGameRoom() {
     socket.on('game:event', (event: GameEvent) => {
       setEvents((current) => [event, ...current.filter((item) => item.id !== event.id)].slice(0, 5))
     })
-    socket.on('room:error', ({ message }: { message: string }) => {
+    socket.on('room:error', ({ code, message }: { code: string; message: string }) => {
       const routeRoomCode = roomCodeFromPath()
       const stored = readStoredSession()
-      if (stored?.roomCode === routeRoomCode) {
+      const isJoinFailureWhileOutsideRoom =
+        !roomRef.current &&
+        stored?.roomCode === routeRoomCode &&
+        ['ROOM_NOT_FOUND', 'GAME_IN_PROGRESS', 'ROOM_FULL'].includes(code)
+
+      if (isJoinFailureWhileOutsideRoom) {
         clearStoredSession()
       }
-      attemptedReconnectRef.current = false
+
+      if (!roomRef.current) {
+        attemptedReconnectRef.current = false
+      }
       setError(message)
     })
 
