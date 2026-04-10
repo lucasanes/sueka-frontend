@@ -16,11 +16,10 @@ function App() {
 
   return (
     <main className={cn('app-shell min-h-svh', theme === 'dark' && 'theme-dark')}>
-      <section className="mx-auto flex min-h-svh w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
+      <section className="mx-auto flex min-h-svh w-full flex-col gap-4 px-4 py-5 sm:px-6 lg:px-8">
         <header className="app-header flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-4">
           <div>
-            <p className="app-kicker text-sm font-bold uppercase text-emerald-800">Sueka online</p>
-            <h1 className="app-title text-3xl font-black text-zinc-950 sm:text-4xl">Mesa para quatro amigos</h1>
+            <h1 className="app-kicker text-2xl font-bold uppercase text-emerald-800">Sueka online</h1>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-3">
             <label className="theme-toggle flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm font-semibold">

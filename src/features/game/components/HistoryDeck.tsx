@@ -24,7 +24,7 @@ export function HistoryDeck({ room, viewerTeamLabel, historyOpen, onToggle, onCl
       </div>
 
       {historyOpen && (
-        <div className="history-popover absolute inset-x-3 top-18 z-30 flex max-h-[calc(100svh-7rem)] flex-col rounded-2xl border p-4 shadow-2xl sm:inset-x-auto sm:right-5 sm:top-20 sm:w-[26rem] sm:max-h-[calc(100svh-8rem)]">
+        <div className="history-popover absolute max-w-100 top-5 right-5 z-30 flex max-h-[calc(100dvh-16rem)] flex-col overflow-hidden rounded-2xl border p-4 shadow-2xl">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-200">Vazas ganhas</p>
@@ -35,7 +35,7 @@ export function HistoryDeck({ room, viewerTeamLabel, historyOpen, onToggle, onCl
             </button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto pr-1">
+          <div className="history-scroll min-h-0 space-y-4 overflow-y-auto pr-1">
             {room.viewerSeat === -1 && <p className="text-sm text-emerald-100">Sente em um lugar para ver as vazas da sua dupla.</p>}
             {room.viewerSeat !== -1 && room.wonTricks.length === 0 && (
               <p className="text-sm text-emerald-100">Sua dupla ainda não venceu nenhuma vaza nesta rodada.</p>
