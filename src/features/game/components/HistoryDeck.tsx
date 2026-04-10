@@ -13,7 +13,7 @@ type HistoryDeckProps = {
 export function HistoryDeck({ room, viewerTeamLabel, historyOpen, onToggle, onClose }: HistoryDeckProps) {
   return (
     <>
-      <div className="absolute right-5 top-5 z-20">
+      <div className="absolute right-5 top-3 z-20">
         <button className="history-deck group relative" onClick={onToggle} type="button">
           <span className="history-deck-layer history-deck-layer-back" />
           <span className="history-deck-layer history-deck-layer-mid" />

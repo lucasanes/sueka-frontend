@@ -152,7 +152,7 @@ export function RoomPage({
           ))}
         </div>
 
-        <div className="relative my-4 flex flex-1 flex-col items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 p-3 sm:my-6 sm:p-4">
+        <div className="relative min-h-60 my-4 flex flex-1 flex-col items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 p-3 sm:my-6 sm:p-4">
           <HistoryDeck historyOpen={historyOpen} onClose={() => setHistoryOpen(false)} onToggle={() => setHistoryOpen((current) => !current)} room={room} viewerTeamLabel={viewerTeamLabel} />
 
           <p className="mb-4 text-sm font-bold uppercase text-emerald-100">Vaza atual</p>
