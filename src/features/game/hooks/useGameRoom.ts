@@ -18,6 +18,29 @@ export function useGameRoom() {
   const [connected, setConnected] = useState(false)
   const [dismissedLowPointsRoundKey, setDismissedLowPointsRoundKey] = useState<string | null>(null)
 
+  function attemptJoinFromRoute(socket: Socket) {
+    const routeRoomCode = roomCodeFromPath()
+    if (!routeRoomCode || attemptedReconnectRef.current) {
+      return
+    }
+
+    const stored = readStoredSession()
+    const fallbackName = playerNameRef.current.trim() || localStorage.getItem(NAME_KEY)?.trim() || ''
+    const shouldRestoreSession = stored?.roomCode === routeRoomCode && Boolean(stored.sessionToken)
+    const playerName = shouldRestoreSession ? (stored?.playerName ?? fallbackName) : fallbackName
+
+    if (!playerName) {
+      return
+    }
+
+    attemptedReconnectRef.current = true
+    socket.emit('room:join', {
+      roomCode: routeRoomCode,
+      playerName,
+      sessionToken: shouldRestoreSession ? stored?.sessionToken : undefined,
+    })
+  }
+
   useEffect(() => {
     playerNameRef.current = playerName
     localStorage.setItem(NAME_KEY, playerName)
@@ -49,16 +72,7 @@ export function useGameRoom() {
 
     socket.on('connect', () => {
       setConnected(true)
-      const routeRoomCode = roomCodeFromPath()
-      const stored = readStoredSession()
-      if (routeRoomCode && stored?.roomCode === routeRoomCode && !attemptedReconnectRef.current) {
-        attemptedReconnectRef.current = true
-        socket.emit('room:join', {
-          roomCode: stored.roomCode,
-          playerName: stored.playerName ?? playerNameRef.current,
-          sessionToken: stored.sessionToken,
-        })
-      }
+      attemptJoinFromRoute(socket)
     })
 
     socket.on('disconnect', () => setConnected(false))
@@ -77,7 +91,15 @@ export function useGameRoom() {
     socket.on('game:event', (event: GameEvent) => {
       setEvents((current) => [event, ...current.filter((item) => item.id !== event.id)].slice(0, 5))
     })
-    socket.on('room:error', ({ message }: { message: string }) => setError(message))
+    socket.on('room:error', ({ message }: { message: string }) => {
+      const routeRoomCode = roomCodeFromPath()
+      const stored = readStoredSession()
+      if (stored?.roomCode === routeRoomCode) {
+        clearStoredSession()
+      }
+      attemptedReconnectRef.current = false
+      setError(message)
+    })
 
     return () => {
       socket.disconnect()
@@ -90,16 +112,10 @@ export function useGameRoom() {
       return
     }
 
-    const stored = readStoredSession()
-    if (stored?.roomCode === routeRoomCode && connected && !room && !attemptedReconnectRef.current) {
+    if (connected && !room && !attemptedReconnectRef.current) {
       const socket = socketRef.current
       if (socket) {
-        attemptedReconnectRef.current = true
-        socket.emit('room:join', {
-          roomCode: stored.roomCode,
-          playerName: stored.playerName ?? playerNameRef.current,
-          sessionToken: stored.sessionToken,
-        })
+        attemptJoinFromRoute(socket)
       }
     }
   }, [connected, path, room])
