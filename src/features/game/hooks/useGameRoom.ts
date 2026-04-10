@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import { NAME_KEY, SERVER_URL, SESSION_KEY, rankOrder, suitOrder } from '../constants'
-import { goTo, readStoredSession, roomCodeFromPath } from '../lib/navigation'
+import { NAME_KEY, SERVER_URL, rankOrder, suitOrder } from '../constants'
+import { clearStoredSession, goTo, readStoredSession, roomCodeFromPath, writeStoredSession } from '../lib/navigation'
 import type { Credentials, GameEvent, RoomState } from '../types'
 
 export function useGameRoom() {
@@ -31,6 +31,7 @@ export function useGameRoom() {
 
       if (!routeRoomCode) {
         attemptedReconnectRef.current = false
+        clearStoredSession()
         setRoom(null)
         setCredentials(null)
         setEvents([])
@@ -64,7 +65,7 @@ export function useGameRoom() {
     socket.on('room:joined', (joined: Credentials) => {
       setCredentials(joined)
       setRoomCodeInput(joined.roomCode)
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...joined, playerName: playerNameRef.current }))
+      writeStoredSession({ ...joined, playerName: playerNameRef.current })
       if (roomCodeFromPath() !== joined.roomCode) {
         goTo(`/room/${joined.roomCode}`)
       }
@@ -163,7 +164,7 @@ export function useGameRoom() {
   function rememberName() {
     const stored = readStoredSession()
     if (stored) {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...stored, playerName }))
+      writeStoredSession({ ...stored, playerName })
     }
     localStorage.setItem(NAME_KEY, playerName)
   }
@@ -189,6 +190,7 @@ export function useGameRoom() {
 
   function leaveRoom() {
     socketRef.current?.emit('room:leave')
+    clearStoredSession()
     setCredentials(null)
     setRoom(null)
     setEvents([])
