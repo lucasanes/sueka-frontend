@@ -45,8 +45,10 @@ function App() {
             groupedHand={gameRoom.groupedHand}
             isOwner={gameRoom.isOwner}
             isViewerTurn={gameRoom.isViewerTurn}
+            lowPointsPrompt={gameRoom.lowPointsPrompt}
             onAddBot={gameRoom.addBot}
             onCopyRoomCode={gameRoom.copyRoomCode}
+            onDismissLowPointsPrompt={gameRoom.dismissLowPointsPrompt}
             onLeaveRoom={gameRoom.leaveRoom}
             onPlayCard={gameRoom.playCard}
             onRestartGame={gameRoom.restartGame}

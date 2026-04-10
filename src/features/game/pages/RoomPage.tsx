@@ -22,10 +22,12 @@ type RoomPageProps = {
   isViewerTurn: boolean
   activeSeatName: string
   groupedHand: GroupedHand[]
+  lowPointsPrompt: { handPoints: number; roundKey: string } | null
   viewerTeamLabel: string
   onCopyRoomCode: () => void
   onTakeSeat: (seatIndex: number) => void
   onAddBot: (seatIndex: number) => void
+  onDismissLowPointsPrompt: () => void
   onPlayCard: (cardId: string) => void
   onStartGame: () => void
   onRestartGame: () => void
@@ -54,10 +56,12 @@ export function RoomPage({
   isViewerTurn,
   activeSeatName,
   groupedHand,
+  lowPointsPrompt,
   viewerTeamLabel,
   onCopyRoomCode,
   onTakeSeat,
   onAddBot,
+  onDismissLowPointsPrompt,
   onPlayCard,
   onStartGame,
   onRestartGame,
@@ -82,7 +86,7 @@ export function RoomPage({
           </div>
           <p className="theme-text-soft text-sm text-zinc-600">
             {room.status === 'lobby' && 'Escolham os lugares. Assentos opostos formam uma dupla.'}
-            {room.status === 'playing' && `Vaza ${room.trickNumber} de 10. Vez de ${activeSeatName}.`}
+            {room.status === 'playing' && `Vaza ${room.trickNumber} de 10. ${activeSeatName !== '' ? `Vez de ${activeSeatName}.` : ''}`}
             {room.status === 'finished' && (room.winnerTeam === null ? 'A partida terminou empatada.' : `Dupla ${room.winnerTeam + 1} venceu.`)}
           </p>
         </div>
@@ -193,6 +197,20 @@ export function RoomPage({
               {room.viewerSeat === -1 ? 'Sente para jogar.' : isViewerTurn ? 'Sua vez.' : 'Aguarde sua vez.'}
             </p>
           </div>
+          {lowPointsPrompt && (
+            <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-zinc-900 shadow-sm">
+              <p className="text-sm font-bold text-amber-950">Sua mão tem menos de 10 pontos.</p>
+              <p className="mt-1 text-sm text-amber-900">Você pode arriar a rodada agora ou seguir com essa mão.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button onClick={onRestartGame} size="sm" variant="danger">
+                  Arriar
+                </Button>
+                <Button onClick={onDismissLowPointsPrompt} size="sm" variant="secondary">
+                  Seguir
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="flex min-h-32 flex-wrap gap-3 pb-2 sm:gap-4">
             {groupedHand.flatMap((group) =>
               group.cards.map((card) => {

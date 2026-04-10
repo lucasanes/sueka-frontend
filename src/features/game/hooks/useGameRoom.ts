@@ -16,6 +16,7 @@ export function useGameRoom() {
   const [events, setEvents] = useState<GameEvent[]>([])
   const [error, setError] = useState('')
   const [connected, setConnected] = useState(false)
+  const [dismissedLowPointsRoundKey, setDismissedLowPointsRoundKey] = useState<string | null>(null)
 
   useEffect(() => {
     playerNameRef.current = playerName
@@ -135,6 +136,30 @@ export function useGameRoom() {
     return `Dupla ${room.viewerSeat % 2 + 1}`
   }, [room])
 
+  const lowPointsPrompt = useMemo(() => {
+    if (!room || room.status !== 'playing' || room.viewerSeat === -1) {
+      return null
+    }
+
+    const isOpeningLead = room.trickNumber === 1 && room.currentTrick.length === 0
+    const isStarter = room.currentTurnSeat === room.viewerSeat
+    if (!isOpeningLead || !isStarter) {
+      return null
+    }
+
+    const handPoints = room.hand.reduce((sum, card) => sum + card.points, 0)
+    if (handPoints >= 10) {
+      return null
+    }
+
+    const roundKey = `${room.roomCode}:${room.trickNumber}:${room.hand.map((card) => card.id).sort().join('|')}`
+    if (dismissedLowPointsRoundKey === roundKey) {
+      return null
+    }
+
+    return { handPoints, roundKey }
+  }, [dismissedLowPointsRoundKey, room])
+
   function rememberName() {
     const stored = readStoredSession()
     if (stored) {
@@ -195,6 +220,8 @@ export function useGameRoom() {
     joinRoom,
     leaveRoom,
     copyRoomCode,
+    lowPointsPrompt,
+    dismissLowPointsPrompt: () => setDismissedLowPointsRoundKey(lowPointsPrompt?.roundKey ?? null),
     takeSeat: (seatIndex: number) => socketRef.current?.emit('seat:take', { seatIndex }),
     addBot: (seatIndex: number) => socketRef.current?.emit('seat:add-bot', { seatIndex }),
     playCard: (cardId: string) => socketRef.current?.emit('card:play', { cardId }),
