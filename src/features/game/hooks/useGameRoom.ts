@@ -201,5 +201,6 @@ export function useGameRoom() {
     playCard: (cardId: string) => socketRef.current?.emit('card:play', { cardId }),
     startGame: () => socketRef.current?.emit('game:start'),
     restartGame: () => socketRef.current?.emit('game:restart'),
+    restartMatch: () => socketRef.current?.emit('game:restart-match'),
   }
 }

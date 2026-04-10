@@ -50,6 +50,7 @@ function App() {
             onLeaveRoom={gameRoom.leaveRoom}
             onPlayCard={gameRoom.playCard}
             onRestartGame={gameRoom.restartGame}
+            onRestartMatch={gameRoom.restartMatch}
             onStartGame={gameRoom.startGame}
             onTakeSeat={gameRoom.takeSeat}
             room={gameRoom.room}

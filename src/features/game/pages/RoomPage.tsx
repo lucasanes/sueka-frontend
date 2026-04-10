@@ -29,6 +29,7 @@ type RoomPageProps = {
   onPlayCard: (cardId: string) => void
   onStartGame: () => void
   onRestartGame: () => void
+  onRestartMatch: () => void
   onLeaveRoom: () => void
 }
 
@@ -60,6 +61,7 @@ export function RoomPage({
   onPlayCard,
   onStartGame,
   onRestartGame,
+  onRestartMatch,
   onLeaveRoom,
 }: RoomPageProps) {
   const [historyOpen, setHistoryOpen] = useState(false)
@@ -114,18 +116,24 @@ export function RoomPage({
           <p className="theme-muted-panel mt-3 rounded-md bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-800">
             {room.matchWinnerTeam === null
               ? `Meta: 4 pontos. Proxima rodada vale ${room.nextRoundStake}.`
-              : `Dupla ${room.matchWinnerTeam + 1} fechou a Sueka. Reiniciar começa um novo placar.`}
+              : `Dupla ${room.matchWinnerTeam + 1} fechou a Sueka. Iniciar ou Reiniciar partida comecam um novo placar.`}
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <Button className="flex-1" disabled={!canStart} onClick={onStartGame}>
-            <Play className="h-4 w-4" />
-            Iniciar
-          </Button>
-          <Button className="flex-1" disabled={!isOwner} onClick={onRestartGame} variant="secondary">
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <Button className="flex-1" disabled={!canStart} onClick={onStartGame}>
+              <Play className="h-4 w-4" />
+              Iniciar
+            </Button>
+            <Button className="flex-1" disabled={!isOwner} onClick={onRestartGame} variant="secondary">
+              <RotateCcw className="h-4 w-4" />
+              Reiniciar
+            </Button>
+          </div>
+          <Button className="w-full" disabled={!isOwner} onClick={onRestartMatch} variant="danger">
             <RotateCcw className="h-4 w-4" />
-            Reiniciar
+            Reiniciar partida
           </Button>
         </div>
 
