@@ -103,7 +103,7 @@ export function useGameRoom() {
   }, [connected, path, room])
 
   const isOwner = Boolean(room && credentials?.playerId === room.ownerId)
-  const canStart = Boolean(isOwner && room?.status === 'lobby' && room.seats.every(Boolean))
+  const canStart = Boolean(isOwner && room && room.status !== 'playing' && room.seats.every(Boolean))
   const isViewerTurn = room?.status === 'playing' && room.viewerSeat === room.currentTurnSeat
 
   const activeSeatName = useMemo(() => {
