@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Copy, Crown, LogOut, Moon, Play, RotateCcw, Sun, Wifi, WifiOff } from 'lucide-react'
+import { Copy, Crown, LogOut, Moon, Play, RotateCcw, Sun, Wifi, WifiOff, X } from 'lucide-react'
 import { io, type Socket } from 'socket.io-client'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
@@ -21,6 +21,7 @@ type Seat = {
   name: string
   connected: boolean
   isOwner: boolean
+  kind: 'human' | 'bot'
   handCount: number
   team: number
 } | null
@@ -35,6 +36,14 @@ type GameEvent = {
   id: string
   message: string
   at: number
+}
+
+type WonTrick = {
+  winnerSeat: number
+  points: number
+  team: number
+  trickNumber: number
+  cards: TrickPlay[]
 }
 
 type RoomState = {
@@ -55,6 +64,7 @@ type RoomState = {
   matchWinnerTeam: number | null
   hand: Card[]
   playableCardIds: string[]
+  wonTricks: WonTrick[]
   lastEvent: GameEvent | null
 }
 
@@ -84,7 +94,7 @@ const suitSymbol: Record<Suit, string> = {
   hearts: '♥',
   spades: '♠',
 }
-const suitOrder: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+const suitOrder: Suit[] = ['clubs', 'diamonds', 'spades', 'hearts']
 const rankOrder = new Map(['2', '3', '4', '5', '6', 'Q', 'J', 'K', '7', 'A'].map((rank, index) => [rank, index]))
 
 function readStoredSession() {
@@ -115,11 +125,13 @@ function CardView({
   card,
   disabled = false,
   isPlayable = false,
+  dimmedWhenDisabled = true,
   onClick,
 }: {
   card: Card
   disabled?: boolean
   isPlayable?: boolean
+  dimmedWhenDisabled?: boolean
   onClick?: () => void
 }) {
   const red = card.suit === 'diamonds' || card.suit === 'hearts'
@@ -130,7 +142,8 @@ function CardView({
         'flex aspect-[5/7] min-h-20 w-14 flex-col justify-between rounded-md border bg-white p-2 text-left shadow-sm transition sm:min-h-24 sm:w-16 lg:min-h-28 lg:w-20',
         red ? 'text-red-700' : 'text-zinc-950',
         isPlayable && 'border-emerald-600 ring-2 ring-emerald-600/20 hover:-translate-y-1 hover:shadow-lg',
-        disabled && 'cursor-not-allowed opacity-60',
+        disabled && 'cursor-not-allowed',
+        disabled && dimmedWhenDisabled && 'opacity-60',
       )}
       disabled={disabled}
       onClick={onClick}
@@ -149,6 +162,7 @@ function SeatPanel({
   active,
   viewerSeat,
   onTakeSeat,
+  onAddBot,
   locked,
 }: {
   seat: Seat
@@ -156,8 +170,11 @@ function SeatPanel({
   active: boolean
   viewerSeat: number
   onTakeSeat: (seatIndex: number) => void
+  onAddBot: (seatIndex: number) => void
   locked: boolean
 }) {
+  const canReplaceBot = Boolean(seat && seat.kind === 'bot' && !locked)
+
   return (
     <div
       className={cn(
@@ -186,20 +203,33 @@ function SeatPanel({
           <div className="seat-panel-name flex items-center gap-1.5 text-sm font-bold text-zinc-950 sm:text-base">
             {seat.isOwner && <Crown className="h-3.5 w-3.5 text-amber-600 sm:h-4 sm:w-4" />}
             <span className="truncate leading-tight">{seat.name}</span>
+            {seat.kind === 'bot' && <span className="seat-panel-bot rounded px-1.5 py-0.5 text-[10px] font-bold uppercase">Bot</span>}
           </div>
           <div className="seat-panel-meta flex items-center justify-between text-xs text-zinc-600 sm:text-sm">
             <span>{seat.handCount} cartas</span>
-            {seat.connected ? (
+            {seat.kind === 'bot' ? (
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 sm:text-xs">Automatico</span>
+            ) : seat.connected ? (
               <Wifi className="h-3.5 w-3.5 text-emerald-700 sm:h-4 sm:w-4" />
             ) : (
               <WifiOff className="h-3.5 w-3.5 text-red-700 sm:h-4 sm:w-4" />
             )}
           </div>
+          {canReplaceBot && (
+            <Button className="mt-2 h-8 w-full text-xs" onClick={() => onTakeSeat(index)} size="sm" variant="secondary">
+              Assumir lugar
+            </Button>
+          )}
         </div>
       ) : (
-        <Button className="h-8 w-full text-xs" disabled={locked} onClick={() => onTakeSeat(index)} size="sm" variant="secondary">
-          Sentar aqui
-        </Button>
+        <div className="space-y-2">
+          <Button className="h-8 w-full text-xs" disabled={locked} onClick={() => onTakeSeat(index)} size="sm" variant="secondary">
+            Sentar aqui
+          </Button>
+          <Button className="h-8 w-full text-xs" disabled={locked} onClick={() => onAddBot(index)} size="sm" variant="secondary">
+            Adicionar bot
+          </Button>
+        </div>
       )}
     </div>
   )
@@ -230,6 +260,7 @@ function App() {
   const [events, setEvents] = useState<GameEvent[]>([])
   const [error, setError] = useState('')
   const [connected, setConnected] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   useEffect(() => {
     playerNameRef.current = playerName
@@ -253,6 +284,7 @@ function App() {
         setCredentials(null)
         setEvents([])
         setError('')
+        setHistoryOpen(false)
       }
     }
 
@@ -343,6 +375,12 @@ function App() {
       }))
       .filter((group) => group.cards.length > 0)
   }, [room])
+  const viewerTeamLabel = useMemo(() => {
+    if (!room || room.viewerSeat === -1) {
+      return ''
+    }
+    return `Dupla ${room.viewerSeat % 2 + 1}`
+  }, [room])
 
   function rememberName() {
     const stored = readStoredSession()
@@ -377,6 +415,7 @@ function App() {
     setCredentials(null)
     setRoom(null)
     setEvents([])
+    setHistoryOpen(false)
     goTo('/')
   }
 
@@ -554,7 +593,63 @@ function App() {
               </Button>
             </aside>
 
-            <section className="flex min-h-[520px] flex-col rounded-md border bg-emerald-900 p-3 text-white shadow-sm sm:min-h-[620px] sm:p-5">
+            <section className="relative flex min-h-[520px] flex-col rounded-md border bg-emerald-900 p-3 text-white shadow-sm sm:min-h-[620px] sm:p-5">
+              <div className="absolute right-3 top-3 z-20 sm:right-5 sm:top-5">
+                <button
+                  className="history-deck group relative"
+                  onClick={() => setHistoryOpen((current) => !current)}
+                  type="button"
+                >
+                  <span className="history-deck-layer history-deck-layer-back" />
+                  <span className="history-deck-layer history-deck-layer-mid" />
+                  <span className="history-deck-layer history-deck-layer-front">
+                    <span className="history-deck-label">
+                      {room.viewerSeat === -1 ? 'Vazas' : viewerTeamLabel}
+                    </span>
+                  </span>
+                </button>
+              </div>
+
+              {historyOpen && (
+                <div className="history-popover absolute inset-x-3 top-18 z-30 rounded-2xl border p-4 shadow-2xl sm:inset-x-auto sm:right-5 sm:top-20 sm:w-[26rem]">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-200">Vazas ganhas</p>
+                      <p className="text-lg font-black text-white">
+                        {room.viewerSeat === -1 ? 'Sente para acompanhar' : viewerTeamLabel}
+                      </p>
+                    </div>
+                    <button className="history-close" onClick={() => setHistoryOpen(false)} type="button">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {room.viewerSeat === -1 && (
+                      <p className="text-sm text-emerald-100">Sente em um lugar para ver as vazas da sua dupla.</p>
+                    )}
+                    {room.viewerSeat !== -1 && room.wonTricks.length === 0 && (
+                      <p className="text-sm text-emerald-100">Sua dupla ainda não venceu nenhuma vaza nesta rodada.</p>
+                    )}
+                    {room.wonTricks.map((trick) => (
+                      <div className="history-trick" key={`won-trick-${trick.trickNumber}`}>
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <p className="text-sm font-bold text-white">Vaza {trick.trickNumber}</p>
+                          <span className="history-points">{trick.points} pts</span>
+                        </div>
+                        <div className="history-hand">
+                          {trick.cards.map((play) => (
+                            <div className="history-mini-card" key={`${trick.trickNumber}-${play.playerId}-${play.card.id}`}>
+                              <CardView card={play.card} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-2 min-[640px]:grid-cols-4">
                 {room.seats.map((seat, index) => (
                   <SeatPanel
@@ -562,6 +657,7 @@ function App() {
                     index={index}
                     key={index}
                     locked={room.status !== 'lobby'}
+                    onAddBot={(seatIndex) => socketRef.current?.emit('seat:add-bot', { seatIndex })}
                     onTakeSeat={(seatIndex) => socketRef.current?.emit('seat:take', { seatIndex })}
                     seat={seat}
                     viewerSeat={room.viewerSeat}
@@ -579,7 +675,7 @@ function App() {
                         className={cn('absolute text-center', trickPositionClass(play.seatIndex, room.viewerSeat))}
                         key={`${play.playerId}-${play.card.id}`}
                       >
-                        <CardView card={play.card} disabled />
+                        <CardView card={play.card} dimmedWhenDisabled={false} disabled />
                         <p className="mt-2 max-w-20 truncate text-xs font-semibold text-emerald-50 sm:max-w-24">
                           {room.seats[play.seatIndex]?.name ?? `Lugar ${play.seatIndex + 1}`}
                         </p>
@@ -607,25 +703,18 @@ function App() {
                 </div>
                 <div className="flex min-h-32 flex-wrap gap-3 pb-2 sm:gap-4">
                   {groupedHand.map((group) => (
-                    <div className="min-w-0 flex-1 basis-36" key={group.suit}>
-                      <p className="mb-2 text-xs font-bold uppercase text-emerald-100">
-                        {suitSymbol[group.suit]} {suitLabel[group.suit]}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {group.cards.map((card) => {
-                          const playable = room.playableCardIds.includes(card.id)
-                          return (
-                            <CardView
-                              card={card}
-                              disabled={!playable}
-                              isPlayable={playable}
-                              key={card.id}
-                              onClick={() => socketRef.current?.emit('card:play', { cardId: card.id })}
-                            />
-                          )
-                        })}
-                      </div>
-                    </div>
+                    group.cards.map((card) => {
+                      const playable = room.playableCardIds.includes(card.id)
+                      return (
+                        <CardView
+                          card={card}
+                          disabled={!playable}
+                          isPlayable={playable}
+                          key={card.id}
+                          onClick={() => socketRef.current?.emit('card:play', { cardId: card.id })}
+                        />
+                      )
+                    })
                   ))}
                   {room.hand.length === 0 && <p className="text-sm text-emerald-100">Nenhuma carta na mão.</p>}
                 </div>
