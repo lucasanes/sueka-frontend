@@ -164,7 +164,6 @@ export function useGameRoom() {
 
   function leaveRoom() {
     socketRef.current?.emit('room:leave')
-    sessionStorage.removeItem(SESSION_KEY)
     setCredentials(null)
     setRoom(null)
     setEvents([])
